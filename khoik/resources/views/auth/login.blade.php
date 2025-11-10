@@ -1,7 +1,7 @@
 <x-layout title="Đăng nhập - FastShip">
     <div class="max-w-md mx-auto">
         <x-page-header 
-            title="🔐 Đăng nhập" 
+            title="Đăng nhập" 
             subtitle="Chọn loại tài khoản và đăng nhập"
         />
 
@@ -21,7 +21,6 @@
                                        required>
                                 <div class="p-4 border-2 border-gray-300 rounded-lg peer-checked:border-orange-600 peer-checked:bg-orange-50 transition-all hover:border-orange-400">
                                     <div class="text-center">
-                                        <div class="text-3xl mb-2">👤</div>
                                         <div class="font-semibold text-gray-900">Cá nhân</div>
                                         <div class="text-xs text-gray-600 mt-1">Khách hàng thường</div>
                                     </div>
@@ -35,7 +34,6 @@
                                        required>
                                 <div class="p-4 border-2 border-gray-300 rounded-lg peer-checked:border-blue-600 peer-checked:bg-blue-50 transition-all hover:border-blue-400">
                                     <div class="text-center">
-                                        <div class="text-3xl mb-2">🏢</div>
                                         <div class="font-semibold text-gray-900">Doanh nghiệp</div>
                                         <div class="text-xs text-gray-600 mt-1">Ưu đãi đặc biệt</div>
                                     </div>
@@ -86,6 +84,9 @@
                         Chưa có tài khoản? 
                         <a href="{{ route('register') }}" class="text-orange-600 font-semibold hover:underline">Đăng ký ngay</a>
                     </p>
+                    <p class="text-sm text-gray-500 mt-2">
+                        Là nhân viên GENZ EXPRESS? <a href="{{ route('staff.login') }}" class="text-orange-600 font-semibold hover:underline">Đăng nhập tại đây</a>
+                    </p>
                 </div>
             </form>
         </x-card>
@@ -94,7 +95,7 @@
         <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="bg-gradient-to-br from-orange-50 to-orange-100 p-4 rounded-lg border border-orange-200">
                 <div class="flex items-start gap-3">
-                    <div class="text-3xl">👤</div>
+                    <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-sm font-semibold text-orange-600">CN</div>
                     <div>
                         <h4 class="font-semibold text-gray-900">Khách hàng cá nhân</h4>
                         <p class="text-sm text-gray-600 mt-1">Gửi hàng dễ dàng, thanh toán linh hoạt</p>
@@ -104,7 +105,7 @@
 
             <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
                 <div class="flex items-start gap-3">
-                    <div class="text-3xl">🏢</div>
+                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-sm font-semibold text-blue-700">DN</div>
                     <div>
                         <h4 class="font-semibold text-gray-900">Doanh nghiệp</h4>
                         <p class="text-sm text-gray-600 mt-1">Giảm 5-20%, lên đơn theo lô, liên kết shop</p>

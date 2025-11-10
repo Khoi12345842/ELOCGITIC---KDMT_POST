@@ -2,7 +2,7 @@
     <div class="max-w-4xl mx-auto">
         <x-card>
             <x-slot:header>
-                <h2 class="text-3xl font-bold text-center">🔍 Tra cứu vận đơn</h2>
+                <h2 class="text-3xl font-bold text-center">Tra cứu vận đơn</h2>
             </x-slot:header>
             
             <!-- Form tìm kiếm -->
@@ -29,7 +29,7 @@
             <!-- Kết quả tracking -->
             <div class="border-t pt-6">
                 <div class="info-box info-box-primary mb-6">
-                    <h3 class="text-xl font-bold mb-4">📦 Thông tin vận đơn</h3>
+                    <h3 class="text-xl font-bold mb-4">Thông tin vận đơn</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <p class="text-sm text-gray-600">Mã vận đơn</p>
@@ -51,7 +51,7 @@
                 </div>
 
                 <div class="info-box bg-gray-50 border-gray-200 mb-6">
-                    <h4 class="font-semibold mb-3">📍 Thông tin giao nhận</h4>
+                    <h4 class="font-semibold mb-3">Thông tin giao nhận</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <p class="text-sm font-semibold text-gray-700">Từ:</p>
@@ -68,7 +68,7 @@
 
                 @if($shipment->driver_name)
                 <div class="info-box bg-yellow-50 border-yellow-200 mb-6">
-                    <h4 class="font-semibold mb-3">🚗 Thông tin tài xế</h4>
+                    <h4 class="font-semibold mb-3">Thông tin tài xế</h4>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <p class="text-sm text-gray-600">Tài xế</p>
@@ -87,7 +87,7 @@
                 @endif
 
                 <!-- Timeline lịch sử -->
-                <h4 class="font-semibold text-lg mb-4">📅 Lịch sử di chuyển</h4>
+                <h4 class="font-semibold text-lg mb-4">Lịch sử di chuyển</h4>
                 <div class="relative">
                     @foreach($shipment->histories as $index => $history)
                     <div class="flex mb-6 {{ $index === 0 ? 'text-blue-600' : '' }}">
@@ -105,10 +105,10 @@
                                 </p>
                                 <p class="text-sm text-gray-500 italic mt-2">{{ $history->description }}</p>
                                 <p class="text-xs text-gray-400 mt-2">
-                                    🕐 {{ $history->happened_at->format('d/m/Y H:i:s') }}
+                                    Thời gian: {{ $history->happened_at->format('d/m/Y H:i:s') }}
                                 </p>
                                 @if($history->updated_by)
-                                <p class="text-xs text-gray-400">👤 {{ $history->updated_by }}</p>
+                                <p class="text-xs text-gray-400">Cập nhật bởi: {{ $history->updated_by }}</p>
                                 @endif
                             </div>
                         </div>
@@ -142,7 +142,7 @@
                         <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
-                        💡 Mã vận đơn mẫu để thử
+                        Gợi ý mã vận đơn mẫu để thử
                     </h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                         @php

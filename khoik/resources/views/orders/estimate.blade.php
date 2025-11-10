@@ -2,7 +2,7 @@
     <div class="max-w-2xl mx-auto">
         <x-card>
             <x-slot:header>
-                <h1 class="text-3xl font-bold text-center">💰 Dự Đoán Chi Phí Vận Chuyển</h1>
+                <h1 class="text-3xl font-bold text-center">Dự Đoán Chi Phí Vận Chuyển</h1>
             </x-slot:header>
             
             {{-- Form nhập thông tin --}}
@@ -45,7 +45,7 @@
                            {{ request('is_express') ? 'checked' : '' }}
                            class="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500">
                     <label for="is_express" class="ml-2 text-sm font-medium text-gray-700">
-                        🚀 Giao hàng hỏa tốc (+30.000đ)
+                        Giao hàng hỏa tốc (+30.000đ)
                     </label>
                 </div>
                 
@@ -69,26 +69,26 @@
                     
                     <div class="space-y-2 text-lg">
                         <div class="flex justify-between">
-                            <span class="text-gray-700">📍 Từ:</span>
+                            <span class="text-gray-700">Điểm gửi:</span>
                             <span class="font-semibold">{{ $validated['from_province'] }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-gray-700">📍 Đến:</span>
+                            <span class="text-gray-700">Điểm nhận:</span>
                             <span class="font-semibold">{{ $validated['to_province'] }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-gray-700">⚖️ Cân nặng:</span>
+                            <span class="text-gray-700">Cân nặng:</span>
                             <span class="font-semibold">{{ $validated['weight'] }} kg</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-gray-700">⏱️ Thời gian dự kiến:</span>
+                            <span class="text-gray-700">Thời gian dự kiến:</span>
                             <span class="font-semibold">{{ $estimatedDays }} ngày</span>
                         </div>
                         
                         <hr class="my-4 border-green-200">
                         
                         <div class="flex justify-between items-center bg-white rounded-lg p-4 shadow-md">
-                            <span class="text-xl font-bold text-gray-700">💰 Tổng chi phí:</span>
+                            <span class="text-xl font-bold text-gray-700">Tổng chi phí:</span>
                             <span class="text-3xl font-bold text-green-600">
                                 {{ number_format($totalPrice) }}đ
                             </span>
@@ -100,14 +100,14 @@
                         @guest
                             <button onclick="alert('Vui lòng đăng nhập để tạo đơn!')" 
                                    class="flex-1 bg-gray-400 text-white py-3 rounded-lg text-center cursor-not-allowed font-semibold">
-                                🔒 Đăng nhập để tạo đơn
+                                Đăng nhập để tạo đơn
                             </button>
                             <a href="#" class="flex-1 btn btn-primary">
-                                📝 Đăng ký ngay
+                                Đăng ký ngay
                             </a>
                         @else
                             <a href="#" class="w-full btn btn-primary btn-lg">
-                                ✅ Tạo đơn với giá này
+                                Tạo đơn với giá này
                             </a>
                         @endguest
                     </div>
@@ -117,11 +117,11 @@
             <x-slot:footer>
                 <div class="text-center text-sm text-gray-600">
                     <a href="{{ route('orders.track') }}" class="text-orange-600 hover:underline">
-                        🔍 Tra cứu đơn hàng
+                        Tra cứu đơn hàng
                     </a>
                     <span class="mx-2">•</span>
                     <a href="{{ route('orders.index') }}" class="text-orange-600 hover:underline">
-                        📦 Danh sách đơn hàng
+                        Danh sách đơn hàng
                     </a>
                 </div>
             </x-slot:footer>

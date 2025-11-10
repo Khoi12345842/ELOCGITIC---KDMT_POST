@@ -1,8 +1,8 @@
-<x-layout title="Lên đơn theo lô - FastShip Business">
+<x-layout title="Quản lý đơn hàng - FastShip Business">
     <div class="max-w-6xl mx-auto">
         <x-page-header 
-            title="📊 Lên đơn theo lô" 
-            subtitle="Dành cho doanh nghiệp - Upload file Excel hoặc nhập thủ công nhiều đơn"
+            title="📊 Quản lý đơn hàng doanh nghiệp" 
+            subtitle="Liên kết shop để tự động đồng bộ đơn hoặc tạo đơn lẻ"
         />
 
         <!-- Thông tin ưu đãi -->
@@ -148,125 +148,181 @@
         </div>
         @endif
 
-        <!-- Tabs -->
-        <div class="mb-6">
-            <div class="border-b border-gray-200">
-                <nav class="-mb-px flex gap-4">
-                    <button onclick="showTab('upload')" id="tab-upload" 
-                            class="tab-button border-b-2 border-orange-600 text-orange-600 py-3 px-6 font-semibold">
-                        📤 Upload File Excel
-                    </button>
-                    <button onclick="showTab('manual')" id="tab-manual" 
-                            class="tab-button border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-3 px-6 font-semibold">
-                        ✍️ Nhập thủ công
-                    </button>
-                </nav>
-            </div>
-        </div>
-
-        <!-- Tab Upload File -->
-        <div id="content-upload" class="tab-content">
+        <!-- Chức năng chính -->
+        <div class="grid md:grid-cols-2 gap-6 mt-8">
+            <!-- Liên kết Shop -->
             <x-card>
                 <x-slot:header>
-                    <h3 class="text-lg font-bold">📤 Upload file Excel/CSV</h3>
+                    <div class="flex items-center gap-3">
+                        <div class="bg-gradient-to-br from-blue-500 to-indigo-600 text-white p-3 rounded-xl">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-bold">🏪 Liên kết Shop</h3>
+                    </div>
                 </x-slot:header>
 
-                <form method="POST" action="{{ route('orders.create.bulk.store') }}" enctype="multipart/form-data">
-                    @csrf
+                <div class="space-y-4">
+                    <p class="text-gray-600">Kết nối với Shopee, Lazada, TikTok Shop để tự động đồng bộ đơn hàng</p>
+                    
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-blue-900 mb-2">✨ Lợi ích khi liên kết:</h4>
+                        <ul class="text-sm text-blue-800 space-y-1">
+                            <li>✅ Tự động đồng bộ đơn hàng từ shop</li>
+                            <li>✅ Không cần nhập thủ công</li>
+                            <li>✅ Cập nhật trạng thái real-time</li>
+                            <li>✅ Giảm giá vận chuyển đến {{ auth()->user()->discount_rate }}%</li>
+                        </ul>
+                    </div>
 
-                    <div class="space-y-4">
-                        <!-- Hướng dẫn -->
-                        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
-                            <div class="flex items-start gap-3">
-                                <svg class="w-6 h-6 text-yellow-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                                <div class="text-sm text-yellow-800">
-                                    <p class="font-semibold mb-2">Hướng dẫn sử dụng:</p>
-                                    <ol class="list-decimal list-inside space-y-1">
-                                        <li>Tải file mẫu Excel về máy</li>
-                                        <li>Điền thông tin đơn hàng theo định dạng</li>
-                                        <li>Upload file lên hệ thống</li>
-                                        <li>Hệ thống sẽ tự động tạo các đơn hàng</li>
-                                    </ol>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Download template -->
-                        <div class="text-center">
-                            <a href="#" class="btn btn-secondary inline-flex items-center gap-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                </svg>
-                                Tải file mẫu Excel
+                    @if(auth()->user()->has_contract && auth()->user()->shop_id)
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+                            <div class="text-4xl mb-2">✅</div>
+                            <p class="font-semibold text-green-900">Đã liên kết: {{ auth()->user()->shop_name }}</p>
+                            <a href="{{ route('shop.dashboard') }}" class="btn btn-secondary btn-sm mt-3">
+                                Quản lý Shop →
                             </a>
                         </div>
-
-                        <!-- Upload area -->
-                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center hover:border-orange-500 transition-colors">
-                            <input type="file" name="file" id="fileInput" accept=".xlsx,.xls,.csv" class="hidden" required onchange="updateFileName()">
-                            <label for="fileInput" class="cursor-pointer">
-                                <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-                                </svg>
-                                <p class="text-lg font-semibold text-gray-700 mb-1">Kéo thả file hoặc click để chọn</p>
-                                <p class="text-sm text-gray-500">Hỗ trợ: .xlsx, .xls, .csv (Tối đa 10MB)</p>
-                                <p id="fileName" class="text-sm text-orange-600 font-semibold mt-2"></p>
-                            </label>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary w-full btn-lg">
+                    @else
+                        <a href="{{ route('shop.link') }}" class="btn btn-primary w-full btn-lg">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
                             </svg>
-                            Upload và tạo đơn
-                        </button>
-                    </div>
-                </form>
+                            Liên kết Shop ngay
+                        </a>
+                    @endif
+                </div>
             </x-card>
-        </div>
 
-        <!-- Tab Nhập thủ công -->
-        <div id="content-manual" class="tab-content hidden">
+            <!-- Tạo đơn lẻ -->
             <x-card>
-                <div class="text-center py-12">
-                    <div class="text-6xl mb-4">🚧</div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">Tính năng đang phát triển</h3>
-                    <p class="text-gray-600 mb-6">Form nhập thủ công nhiều đơn đang được xây dựng.</p>
-                    <p class="text-sm text-gray-500">Vui lòng sử dụng tính năng Upload File Excel hoặc tạo từng đơn riêng lẻ.</p>
-                    <a href="{{ route('orders.create.individual') }}" class="btn btn-primary mt-6 inline-flex items-center gap-2">
-                        📦 Tạo đơn đơn lẻ
+                <x-slot:header>
+                    <div class="flex items-center gap-3">
+                        <div class="bg-gradient-to-br from-orange-500 to-red-600 text-white p-3 rounded-xl">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-bold">📦 Tạo đơn lẻ</h3>
+                    </div>
+                </x-slot:header>
+
+                <div class="space-y-4">
+                    <p class="text-gray-600">Tạo đơn hàng riêng lẻ giống như khách hàng cá nhân</p>
+                    
+                    <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-orange-900 mb-2">📋 Phù hợp cho:</h4>
+                        <ul class="text-sm text-orange-800 space-y-1">
+                            <li>✓ Đơn hàng đặc biệt, khẩn cấp</li>
+                            <li>✓ Đơn không từ sàn TMĐT</li>
+                            <li>✓ Gửi hàng nội bộ công ty</li>
+                            <li>✓ Đơn hàng thử nghiệm</li>
+                        </ul>
+                    </div>
+
+                    <a href="{{ route('orders.create.individual') }}" class="btn btn-primary w-full btn-lg">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Tạo đơn lẻ
                     </a>
                 </div>
             </x-card>
         </div>
     </div>
 
-    <x-slot:scripts>
-        <script>
-            function showTab(tab) {
-                // Hide all
-                document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-                document.querySelectorAll('.tab-button').forEach(el => {
-                    el.classList.remove('border-orange-600', 'text-orange-600');
-                    el.classList.add('border-transparent', 'text-gray-500');
-                });
+    <!-- Popup liên kết thành công -->
+    @if(session('shop_linked'))
+    <div id="successPopup" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 overflow-hidden animate-bounce-in">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-6 text-center">
+                <div class="text-6xl mb-3">🎉</div>
+                <h2 class="text-2xl font-bold">Liên kết thành công!</h2>
+            </div>
 
-                // Show selected
-                document.getElementById('content-' + tab).classList.remove('hidden');
-                const tabBtn = document.getElementById('tab-' + tab);
-                tabBtn.classList.add('border-orange-600', 'text-orange-600');
-                tabBtn.classList.remove('border-transparent', 'text-gray-500');
-            }
+            <!-- Content -->
+            <div class="p-6 space-y-4">
+                <div class="text-center">
+                    <p class="text-lg text-gray-800 font-semibold mb-2">
+                        Shop "{{ session('shop_name') }}" đã được liên kết
+                    </p>
+                    <p class="text-gray-600">
+                        Nền tảng: <span class="font-semibold text-blue-600">{{ session('shop_platform') }}</span>
+                    </p>
+                </div>
 
-            function updateFileName() {
-                const input = document.getElementById('fileInput');
-                const fileName = document.getElementById('fileName');
-                if (input.files.length > 0) {
-                    fileName.textContent = '📄 ' + input.files[0].name;
-                }
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                    <div class="flex items-center gap-3">
+                        <div class="text-3xl">📦</div>
+                        <div>
+                            <p class="font-semibold text-blue-900 mb-1">Đơn hàng đã được đồng bộ</p>
+                            <p class="text-blue-800">
+                                Hệ thống đã tự động tạo <span class="font-bold text-2xl">{{ session('order_count') }}</span> đơn hàng từ shop của bạn
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded">
+                    <div class="flex items-center gap-3">
+                        <div class="text-3xl">👨‍💼</div>
+                        <div>
+                            <p class="font-semibold text-green-900 mb-1">Nhân viên đã được thông báo</p>
+                            <p class="text-green-800">
+                                Các đơn hàng đã được phân công tự động cho nhân viên vận chuyển
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-yellow-50 border border-yellow-300 p-4 rounded-lg">
+                    <p class="text-sm text-yellow-800">
+                        💡 <strong>Mẹo:</strong> Các đơn hàng sẽ được cập nhật trạng thái tự động. 
+                        Bạn có thể xem chi tiết tại <strong>"Đơn hàng của tôi"</strong> hoặc <strong>"Quản lý Shop"</strong>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="bg-gray-50 px-6 py-4 flex gap-3">
+                <button onclick="closePopup()" class="flex-1 bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-orange-700 transition">
+                    Đóng
+                </button>
+                <a href="{{ route('orders.index') }}" class="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition text-center">
+                    Xem đơn hàng
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes bounce-in {
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
             }
-        </script>
-    </x-slot:scripts>
+            50% {
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        .animate-bounce-in {
+            animation: bounce-in 0.6s ease-out;
+        }
+    </style>
+
+    <script>
+        function closePopup() {
+            document.getElementById('successPopup').style.display = 'none';
+        }
+    </script>
+    @endif
 </x-layout>

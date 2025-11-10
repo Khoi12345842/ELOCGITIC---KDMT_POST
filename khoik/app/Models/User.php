@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
@@ -22,6 +23,7 @@ class User extends Authenticatable
         'email',
         'password',
         'user_type',
+    'role',
         'company_name',
         'tax_code',
         'business_license',
@@ -64,6 +66,9 @@ class User extends Authenticatable
         ];
     }
 
+    public const ROLE_CUSTOMER = 'customer';
+    public const ROLE_STAFF = 'staff';
+
     /**
      * Check if user is business type
      */
@@ -80,11 +85,36 @@ class User extends Authenticatable
         return $this->user_type === 'individual';
     }
 
+    public function isStaff(): bool
+    {
+        return $this->role === self::ROLE_STAFF;
+    }
+
     /**
      * Get orders relationship
      */
     public function orders()
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function assignedOrders(): HasMany
+    {
+        return $this->hasMany(Order::class, 'assigned_to');
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class)->orderBy('created_at', 'desc');
+    }
+
+    public function unreadNotifications()
+    {
+        return $this->hasMany(Notification::class)->whereNull('read_at')->orderBy('created_at', 'desc');
+    }
+
+    public function incidentReports()
+    {
+        return $this->hasMany(IncidentReport::class, 'reported_by');
     }
 }

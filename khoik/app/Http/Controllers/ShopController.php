@@ -61,14 +61,41 @@ class ShopController extends Controller
                 'contract_end_date' => now()->addMonths($validated['contract_duration']),
             ]);
 
-            // Tạo đơn fake từ shop (5-10 đơn)
-            $orderCount = rand(5, 10);
-            $this->generateFakeShopOrders($user, $orderCount);
+            // Tạo 15 đơn fake từ shop
+            $orderCount = 15;
+            $createdOrders = $this->generateFakeShopOrders($user, $orderCount);
+
+            // Gửi thông báo cho nhân viên về các đơn mới
+            $staffUsers = User::where('role', 'staff')->get();
+            foreach ($createdOrders as $order) {
+                // Chọn random 1 nhân viên để phân công
+                if ($staffUsers->isNotEmpty()) {
+                    $assignedStaff = $staffUsers->random();
+                    $order->update(['assigned_to' => $assignedStaff->id]);
+                    
+                    // Tạo thông báo cho nhân viên
+                    \App\Models\Notification::create([
+                        'user_id' => $assignedStaff->id,
+                        'type' => 'new_order',
+                        'title' => '🎉 Đơn hàng mới từ Shop',
+                        'message' => "Bạn được phân công đơn hàng #{$order->order_number} từ shop {$user->shop_name} ({$user->shop_platform})",
+                        'data' => [
+                            'order_id' => $order->id,
+                            'order_number' => $order->order_number,
+                            'shop_name' => $user->shop_name,
+                            'shop_platform' => $user->shop_platform,
+                        ],
+                    ]);
+                }
+            }
 
             DB::commit();
 
             return redirect()->route('orders.create.bulk')
-                ->with('success', '🎉 Liên kết shop thành công! Đã đồng bộ ' . $orderCount . ' đơn hàng từ shop của bạn. Bạn có thể xem các đơn hàng ở phần "Đơn hàng của tôi" hoặc "Quản lý Shop".');
+                ->with('shop_linked', true)
+                ->with('shop_name', $validated['shop_name'])
+                ->with('shop_platform', $validated['shop_platform'])
+                ->with('order_count', $orderCount);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -131,6 +158,8 @@ class ShopController extends Controller
         $faker = \Faker\Factory::create('vi_VN');
         $cities = ['Hà Nội', 'TP.HCM', 'Đà Nẵng', 'Hải Phòng', 'Cần Thơ'];
         $statuses = ['pending', 'confirmed', 'picked_up', 'in_transit', 'out_delivery', 'delivered'];
+        
+        $createdOrders = [];
 
         for ($i = 0; $i < $count; $i++) {
             $status = $statuses[array_rand($statuses)];
@@ -173,14 +202,19 @@ class ShopController extends Controller
                 'order_id' => $order->id,
                 'tracking_number' => 'FS' . strtoupper(substr(md5(uniqid()), 0, 10)),
                 'current_location' => $this->getLocationByStatus($status, $order),
-                'status' => $status,
+                'current_status' => $status,
+                'status_description' => 'Trạng thái hiện tại: ' . (Order::STATUS_LABELS[$status] ?? $status),
                 'latitude' => $faker->latitude(8, 23),
                 'longitude' => $faker->longitude(102, 109),
             ]);
 
             // Tạo history
             $this->createShipmentHistory($order, $shipment);
+            
+            $createdOrders[] = $order;
         }
+        
+        return $createdOrders;
     }
 
     private function generateOrderNumber(): string
@@ -225,11 +259,11 @@ class ShopController extends Controller
         $baseTime = $order->created_at;
         foreach ($statuses as $i => $item) {
             ShipmentHistory::create([
-                'shipment_id' => $shipment->id,
+                'order_id' => $order->id,
                 'status' => $item['status'],
                 'location' => $item['location'],
-                'description' => 'Cập nhật: ' . $item['status'],
-                'updated_by' => 'Hệ thống tự động',
+                'notes' => 'Cập nhật: ' . $item['status'],
+                'updated_by' => auth()->id() ?? 1,
                 'happened_at' => $baseTime->copy()->addHours(rand(2, 12) * ($i + 1)),
             ]);
         }

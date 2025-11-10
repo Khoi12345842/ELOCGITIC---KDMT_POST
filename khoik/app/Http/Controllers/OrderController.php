@@ -2,32 +2,84 @@
 
 namespace App\Http\Controllers;
 
-    use App\Models\Order;
+use App\Models\Order;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
     // Danh sách đơn hàng
-    public function index()
+    public function index(Request $request)
     {
-        // Lấy đơn của user hiện tại + đơn fake để đa dạng
-        $orders = Order::with('shipment')
-            ->where(function($query) {
-                // Đơn của user hiện tại
+        $filters = [
+            'search' => trim((string) $request->query('search', '')),
+            'status' => $request->query('status', ''),
+            'type' => $request->query('type', ''),
+            'date_from' => $request->query('date_from', ''),
+            'date_to' => $request->query('date_to', ''),
+        ];
+
+        $query = Order::with('shipment')
+            ->where(function ($query) {
                 $query->where('user_id', auth()->id())
-                      // HOẶC đơn fake (để hiển thị cùng cho đa dạng)
-                      ->orWhere('order_type', 'fake');
-            })
+                    ->orWhere('order_type', 'fake');
+            });
+
+        if ($filters['search'] !== '') {
+            $searchTerm = '%' . $filters['search'] . '%';
+
+            $query->where(function ($query) use ($searchTerm) {
+                $query->where('order_number', 'like', $searchTerm)
+                    ->orWhere('receiver_name', 'like', $searchTerm)
+                    ->orWhere('receiver_phone', 'like', $searchTerm)
+                    ->orWhere('receiver_address', 'like', $searchTerm)
+                    ->orWhereHas('shipment', function ($shipmentQuery) use ($searchTerm) {
+                        $shipmentQuery->where('tracking_number', 'like', $searchTerm);
+                    });
+            });
+        }
+
+        if ($filters['status'] !== '') {
+            $query->where('status', $filters['status']);
+        }
+
+        if ($filters['type'] !== '') {
+            $query->where('order_type', $filters['type']);
+        }
+
+        if ($filters['date_from'] !== '') {
+            $query->whereDate('created_at', '>=', $filters['date_from']);
+        }
+
+        if ($filters['date_to'] !== '') {
+            $query->whereDate('created_at', '<=', $filters['date_to']);
+        }
+
+        $orders = $query
             ->orderBy('created_at', 'desc')
-            ->paginate(20);
-            
-        return view('orders.index', compact('orders'));
+            ->paginate(20)
+            ->withQueryString();
+
+        $statusOptions = Order::STATUS_LABELS;
+
+        $typeOptions = [
+            'manual' => 'Đơn thủ công',
+            'bulk' => 'Đơn theo lô',
+            'shop_sync' => 'Đồng bộ từ shop',
+            'fake' => 'Đơn demo',
+        ];
+
+        $hasFilters = collect($filters)
+            ->except('search')
+            ->filter(fn ($value) => $value !== '')
+            ->isNotEmpty() || $filters['search'] !== '';
+
+        return view('orders.index', compact('orders', 'filters', 'statusOptions', 'typeOptions', 'hasFilters'));
     }
     
     // Chi tiết đơn hàng
     public function show($id)
     {
-        $order = Order::with(['shipment.histories']  )->findOrFail($id);
+        $order = Order::with(['shipment', 'shipmentHistories.updatedByUser'])->findOrFail($id);
         
         return view('orders.show', compact('order'));
     }
@@ -41,7 +93,7 @@ class OrderController extends Controller
             return view('orders.track');
         }
         
-        $shipment = \App\Models\Shipment::with(['order', 'histories'])
+        $shipment = \App\Models\Shipment::with(['order.shipmentHistories.updatedByUser'])
             ->where('tracking_number', $trackingNumber)
             ->first();
             

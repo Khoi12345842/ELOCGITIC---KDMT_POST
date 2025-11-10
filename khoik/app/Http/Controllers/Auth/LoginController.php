@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 
 class LoginController extends Controller
 {
@@ -30,6 +31,14 @@ class LoginController extends Controller
         // Thử đăng nhập
         if (Auth::attempt(['email' => $credentials['email'], 'password' => $credentials['password']], $request->filled('remember'))) {
             $user = Auth::user();
+
+            if ($user->role === User::ROLE_STAFF) {
+                Auth::logout();
+
+                return redirect()->route('staff.login')
+                    ->withErrors(['email' => 'Tài khoản này thuộc phân hệ nhân viên. Vui lòng đăng nhập tại cổng nhân viên.'])
+                    ->withInput($request->only('email'));
+            }
             
             // Kiểm tra loại tài khoản có khớp không
             if ($user->user_type !== $credentials['user_type']) {
@@ -46,8 +55,8 @@ class LoginController extends Controller
             $request->session()->regenerate();
 
             $userName = $user->name;
-            $userType = $user->isBusiness() ? '🏢 Doanh nghiệp' : '👤 Cá nhân';
-            
+            $userType = $user->isBusiness() ? 'Doanh nghiệp' : 'Cá nhân';
+
             return redirect()->intended(route('orders.index'))
                 ->with('success', "Chào mừng {$userType} {$userName}!");
         }

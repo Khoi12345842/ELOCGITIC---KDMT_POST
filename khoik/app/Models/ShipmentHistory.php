@@ -10,16 +10,27 @@ class ShipmentHistory extends Model
     use HasFactory;
     
     protected $fillable = [
-        'shipment_id', 'status', 'location', 
-        'description', 'updated_by', 'happened_at'
+        'order_id', 
+        'status', 
+        'location', 
+        'notes', 
+        'updated_by', 
+        'happened_at'
     ];
     
     protected $casts = [
         'happened_at' => 'datetime',
     ];
     
-    public function shipment()
+    // Relationship với Order
+    public function order()
     {
-        return $this->belongsTo(Shipment::class);
+        return $this->belongsTo(Order::class);
+    }
+    
+    // Relationship với User (nhân viên cập nhật)
+    public function updatedByUser()
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 }

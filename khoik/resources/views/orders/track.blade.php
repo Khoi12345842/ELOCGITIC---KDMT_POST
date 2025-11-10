@@ -1,9 +1,9 @@
 <x-layout title="Tra cứu đơn hàng - FastShip">
     <div class="max-w-7xl mx-auto">
         <!-- Hero Section -->
-        <div class="bg-gradient-to-r from-orange-600 to-orange-500 text-white rounded-2xl p-8 mb-8 shadow-xl">
+    <div class="bg-gradient-to-r from-orange-600 to-orange-500 text-white rounded-2xl p-8 mb-8 shadow-xl">
             <div class="text-center">
-                <h1 class="text-4xl font-bold mb-3">🔍 Tra cứu đơn hàng</h1>
+        <h1 class="text-4xl font-bold mb-3">Tra cứu đơn hàng</h1>
                 <p class="text-orange-100 text-lg">Nhập mã vận đơn để theo dõi hành trình giao hàng của bạn</p>
             </div>
 
@@ -40,23 +40,24 @@
             <div class="lg:col-span-2 space-y-6">
                 <!-- Trạng thái hiện tại -->
                 <x-card class="border-2 border-orange-500">
+                    @php
+                        $statusShortLabels = [
+                            'delivered' => 'HT',
+                            'out_delivery' => 'DG',
+                            'in_transit' => 'VC',
+                            'picked_up' => 'LH',
+                            'confirmed' => 'XN',
+                            'pending' => 'CH',
+                        ];
+                        $statusBadge = $statusShortLabels[$shipment->order->status] ?? 'TG';
+                    @endphp
                     <div class="flex items-start gap-6">
                         <div class="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
-                            <span class="text-4xl">
-                                @if($shipment->order->status === 'delivered')
-                                    ✅
-                                @elseif(in_array($shipment->order->status, ['in_transit', 'out_delivery']))
-                                    🚚
-                                @elseif($shipment->order->status === 'picked_up')
-                                    📦
-                                @else
-                                    ⏳
-                                @endif
-                            </span>
+                            <span class="text-xl font-bold text-orange-700">{{ $statusBadge }}</span>
                         </div>
                         <div class="flex-1">
                             <h2 class="text-2xl font-bold text-gray-900 mb-2">{{ $shipment->current_status }}</h2>
-                            <p class="text-gray-600 mb-1">📍 {{ $shipment->current_location }}</p>
+                            <p class="text-gray-600 mb-1">Địa điểm hiện tại: {{ $shipment->current_location }}</p>
                             <p class="text-sm text-gray-500">Cập nhật: {{ $shipment->updated_at->format('H:i - d/m/Y') }}</p>
                         </div>
                     </div>
@@ -64,10 +65,18 @@
 
                 <!-- Progress Bar -->
                 <x-card>
-                    <h3 class="font-bold text-lg mb-4">📊 Tiến trình vận chuyển</h3>
+                    <h3 class="font-bold text-lg mb-4">Tiến trình vận chuyển</h3>
                     <div class="relative">
                         @php
                             $statusFlow = ['pending', 'confirmed', 'picked_up', 'in_transit', 'out_delivery', 'delivered'];
+                            $statusLabels = [
+                                'pending' => 'Chờ',
+                                'confirmed' => 'Xác nhận',
+                                'picked_up' => 'Lấy hàng',
+                                'in_transit' => 'Vận chuyển',
+                                'out_delivery' => 'Đang giao',
+                                'delivered' => 'Hoàn tất',
+                            ];
                             $currentIndex = array_search($shipment->order->status, $statusFlow);
                             $progress = $currentIndex !== false ? (($currentIndex + 1) / count($statusFlow)) * 100 : 0;
                         @endphp
@@ -79,17 +88,17 @@
 
                         <!-- Steps -->
                         <div class="grid grid-cols-6 gap-2">
-                            @foreach(['pending' => '⏳', 'confirmed' => '✓', 'picked_up' => '📦', 'in_transit' => '🚚', 'out_delivery' => '🏃', 'delivered' => '✅'] as $status => $icon)
+                            @foreach($statusFlow as $index => $status)
                             @php
                                 $stepIndex = array_search($status, $statusFlow);
-                                $isActive = $stepIndex <= $currentIndex;
+                                $isActive = $stepIndex !== false && $stepIndex <= $currentIndex;
                             @endphp
                             <div class="text-center">
-                                <div class="w-10 h-10 mx-auto rounded-full flex items-center justify-center text-lg mb-2 {{ $isActive ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-500' }}">
-                                    {{ $icon }}
+                                <div class="w-10 h-10 mx-auto rounded-full flex items-center justify-center text-sm font-semibold mb-2 {{ $isActive ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-500' }}">
+                                    {{ $index + 1 }}
                                 </div>
                                 <p class="text-xs {{ $isActive ? 'font-semibold text-gray-900' : 'text-gray-500' }}">
-                                    {{ ['pending' => 'Chờ', 'confirmed' => 'Xác nhận', 'picked_up' => 'Lấy hàng', 'in_transit' => 'Vận chuyển', 'out_delivery' => 'Đang giao', 'delivered' => 'Hoàn tất'][$status] }}
+                                    {{ $statusLabels[$status] ?? ucfirst(str_replace('_', ' ', $status)) }}
                                 </p>
                             </div>
                             @endforeach
@@ -100,41 +109,47 @@
                 <!-- Timeline lịch sử -->
                 <x-card>
                     <x-slot:header>
-                        <h3 class="text-lg font-bold">📅 Lịch sử di chuyển</h3>
+                        <h3 class="text-lg font-bold">Lịch sử di chuyển</h3>
                     </x-slot:header>
 
-                    <div class="space-y-4">
-                        @foreach($shipment->histories->sortByDesc('happened_at') as $index => $history)
-                        <div class="flex gap-4 {{ $index === 0 ? 'bg-orange-50 -mx-6 px-6 py-4 rounded-lg' : '' }}">
-                            <div class="flex-shrink-0 pt-1">
-                                <div class="w-3 h-3 {{ $index === 0 ? 'bg-orange-600 ring-4 ring-orange-200' : 'bg-gray-300' }} rounded-full"></div>
-                                @if($index < count($shipment->histories) - 1)
-                                <div class="w-0.5 h-12 bg-gray-200 ml-1 mt-1"></div>
-                                @endif
-                            </div>
-                            <div class="flex-1">
-                                <div class="flex items-start justify-between gap-4">
-                                    <div>
-                                        <p class="font-bold {{ $index === 0 ? 'text-orange-600' : 'text-gray-900' }}">
-                                            {{ $history->status }}
-                                        </p>
-                                        <p class="text-sm text-gray-600 mt-1">📍 {{ $history->location }}</p>
-                                        @if($history->description)
-                                        <p class="text-sm text-gray-500 italic mt-1">{{ $history->description }}</p>
-                                        @endif
-                                        @if($history->updated_by)
-                                        <p class="text-xs text-gray-400 mt-1">👤 {{ $history->updated_by }}</p>
-                                        @endif
-                                    </div>
-                                    <div class="text-right flex-shrink-0">
-                                        <p class="text-sm font-semibold text-gray-900">{{ $history->happened_at->format('H:i') }}</p>
-                                        <p class="text-xs text-gray-500">{{ $history->happened_at->format('d/m/Y') }}</p>
+                    @if($shipment->order->shipmentHistories->count() > 0)
+                        <div class="space-y-4">
+                            @foreach($shipment->order->shipmentHistories as $index => $history)
+                            <div class="flex gap-4 {{ $index === 0 ? 'bg-orange-50 -mx-6 px-6 py-4 rounded-lg' : '' }}">
+                                <div class="flex-shrink-0 pt-1">
+                                    <div class="w-3 h-3 {{ $index === 0 ? 'bg-orange-600 ring-4 ring-orange-200' : 'bg-gray-300' }} rounded-full"></div>
+                                    @if($index < $shipment->order->shipmentHistories->count() - 1)
+                                    <div class="w-0.5 h-12 bg-gray-200 ml-1 mt-1"></div>
+                                    @endif
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-start justify-between gap-4">
+                                        <div>
+                                            <p class="font-bold {{ $index === 0 ? 'text-orange-600' : 'text-gray-900' }}">
+                                                {{ \App\Models\Order::STATUS_LABELS[$history->status] ?? $history->status }}
+                                            </p>
+                                            @if($history->location)
+                                                <p class="text-sm text-gray-600 mt-1">Địa điểm: {{ $history->location }}</p>
+                                            @endif
+                                            @if($history->notes)
+                                                <p class="text-sm text-gray-500 italic mt-1">{{ $history->notes }}</p>
+                                            @endif
+                                            @if($history->updatedByUser)
+                                                <p class="text-xs text-gray-400 mt-1">Cập nhật bởi: {{ $history->updatedByUser->name }}</p>
+                                            @endif
+                                        </div>
+                                        <div class="text-right flex-shrink-0">
+                                            <p class="text-sm font-semibold text-gray-900">{{ $history->happened_at->format('H:i') }}</p>
+                                            <p class="text-xs text-gray-500">{{ $history->happened_at->format('d/m/Y') }}</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+                            @endforeach
                         </div>
-                        @endforeach
-                    </div>
+                    @else
+                        <p class="text-gray-500 text-center py-8">Chưa có lịch sử vận chuyển</p>
+                    @endif
                 </x-card>
             </div>
 
@@ -142,7 +157,7 @@
             <div class="space-y-6">
                 <!-- Thông tin vận đơn -->
                 <x-card class="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
-                    <h3 class="font-bold text-lg mb-4">📦 Thông tin vận đơn</h3>
+                    <h3 class="font-bold text-lg mb-4">Thông tin vận đơn</h3>
                     <div class="space-y-3">
                         <div>
                             <p class="text-sm text-gray-600">Mã vận đơn</p>
@@ -165,14 +180,14 @@
 
                 <!-- Thông tin giao nhận -->
                 <x-card class="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
-                    <h3 class="font-bold text-lg mb-4">📍 Thông tin giao nhận</h3>
+                    <h3 class="font-bold text-lg mb-4">Thông tin giao nhận</h3>
                     
                     <div class="space-y-4">
                         <div class="bg-white rounded-lg p-3">
                             <p class="text-xs text-gray-500 mb-1">Người gửi</p>
                             <p class="font-bold text-gray-900">{{ $shipment->order->sender_name }}</p>
-                            <p class="text-sm text-gray-600">📞 {{ $shipment->order->sender_phone }}</p>
-                            <p class="text-sm text-gray-600">📍 {{ $shipment->order->sender_city }}</p>
+                            <p class="text-sm text-gray-600">Điện thoại: {{ $shipment->order->sender_phone }}</p>
+                            <p class="text-sm text-gray-600">Khu vực: {{ $shipment->order->sender_city }}</p>
                         </div>
 
                         <div class="flex justify-center">
@@ -184,8 +199,8 @@
                         <div class="bg-white rounded-lg p-3">
                             <p class="text-xs text-gray-500 mb-1">Người nhận</p>
                             <p class="font-bold text-gray-900">{{ $shipment->order->receiver_name }}</p>
-                            <p class="text-sm text-gray-600">📞 {{ $shipment->order->receiver_phone }}</p>
-                            <p class="text-sm text-gray-600">📍 {{ $shipment->order->receiver_city }}</p>
+                            <p class="text-sm text-gray-600">Điện thoại: {{ $shipment->order->receiver_phone }}</p>
+                            <p class="text-sm text-gray-600">Khu vực: {{ $shipment->order->receiver_city }}</p>
                         </div>
                     </div>
                 </x-card>
@@ -193,7 +208,7 @@
                 @if($shipment->driver_name)
                 <!-- Thông tin tài xế -->
                 <x-card class="bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200">
-                    <h3 class="font-bold text-lg mb-4">🚗 Thông tin tài xế</h3>
+                    <h3 class="font-bold text-lg mb-4">Thông tin tài xế</h3>
                     <div class="space-y-3">
                         <div>
                             <p class="text-sm text-gray-600">Tài xế</p>
@@ -209,7 +224,7 @@
                         </div>
                     </div>
                     <a href="tel:{{ $shipment->driver_phone }}" class="btn btn-sm btn-primary w-full mt-4">
-                        📞 Gọi tài xế
+                        Gọi tài xế
                     </a>
                 </x-card>
                 @endif
@@ -239,7 +254,6 @@
         @if(!isset($shipment) && request()->has('tracking_number'))
         <!-- Không tìm thấy -->
         <x-card class="text-center py-12">
-            <div class="text-6xl mb-4">😞</div>
             <h3 class="text-2xl font-bold text-gray-900 mb-2">Không tìm thấy vận đơn</h3>
             <p class="text-gray-600 mb-6">Mã vận đơn "{{ request('tracking_number') }}" không tồn tại trong hệ thống</p>
             <a href="{{ route('orders.track') }}" class="btn btn-primary">
@@ -253,7 +267,7 @@
         <div class="mt-8">
             <x-card>
                 <x-slot:header>
-                    <h3 class="text-lg font-bold">💡 Gợi ý: Thử tra cứu các đơn hàng mẫu</h3>
+                    <h3 class="text-lg font-bold">Gợi ý: Thử tra cứu các đơn hàng mẫu</h3>
                 </x-slot:header>
 
                 @php
@@ -277,11 +291,11 @@
                                 </p>
                                 <p class="text-xs text-gray-500 mt-1">
                                     @if($sample->order->status === 'delivered')
-                                        ✅ Đã giao
+                                        Trạng thái: Đã giao
                                     @elseif(in_array($sample->order->status, ['in_transit', 'out_delivery']))
-                                        🚚 Đang giao
+                                        Trạng thái: Đang giao
                                     @else
-                                        ⏳ Đang xử lý
+                                        Trạng thái: Đang xử lý
                                     @endif
                                 </p>
                             </div>

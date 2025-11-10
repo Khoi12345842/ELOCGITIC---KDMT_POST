@@ -164,3 +164,22 @@ Chúc bạn demo thành công! 🎉
 
 
 còn thiếu hoặc cần sửa : liên kết shop doanh nghiệp , tên shop ,giao diện các đơn hàng , giao diện chưa đăng nhập cần hoàn thiện 
+
+
+
+
+tk demo:
+nhân viên :
+- email:khoi@gmail.com
+- password:15042004
+
+
+doanh nghiệp :
+- email:doanhnghiep@gmail.com
+- password:15042004
+
+cá nhân :
+- email:canhan@gmail.com
+- password:15042004
+
+

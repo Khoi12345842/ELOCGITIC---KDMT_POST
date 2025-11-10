@@ -52,6 +52,11 @@ class CreateOrderController extends Controller
             $codAmount = $validated['cod_amount'] ?? 0;
             $totalAmount = $shippingFee + $codAmount;
 
+            // Tự động chọn nhân viên để phân công (round-robin hoặc random)
+            $assignedStaff = \App\Models\User::where('role', 'staff')
+                ->inRandomOrder()
+                ->first();
+
             // Tạo order
             $order = Order::create([
                 'order_number' => $this->generateOrderNumber(),
@@ -72,6 +77,9 @@ class CreateOrderController extends Controller
                 'total_amount' => $totalAmount,
                 'status' => 'pending',
                 'notes' => $validated['notes'],
+                'assigned_to' => $assignedStaff?->id, // Phân công tự động
+                'route_code' => $this->generateRouteCode($validated['sender_city'], $validated['receiver_city']),
+                'scheduled_date' => now()->addDay(), // Dự kiến giao ngày mai
             ]);
 
             // Tạo shipment
@@ -79,18 +87,34 @@ class CreateOrderController extends Controller
                 'order_id' => $order->id,
                 'tracking_number' => $this->generateTrackingNumber(),
                 'current_location' => 'Chờ lấy hàng',
-                'status' => 'pending',
+                'current_status' => 'Chờ xử lý',
+                'status_description' => 'Đơn hàng đã được tạo và đang chờ xác nhận',
             ]);
 
             // Tạo lịch sử đầu tiên
             ShipmentHistory::create([
-                'shipment_id' => $shipment->id,
-                'status' => 'Đơn hàng đã được tạo',
+                'order_id' => $order->id,
+                'status' => 'pending',
                 'location' => 'Hệ thống',
-                'description' => 'Đơn hàng của bạn đã được tạo thành công và đang chờ xác nhận.',
-                'updated_by' => auth()->user()->name,
+                'notes' => 'Đơn hàng của bạn đã được tạo thành công và đang chờ xác nhận.',
+                'updated_by' => auth()->id(),
                 'happened_at' => now(),
             ]);
+
+            // Gửi thông báo cho nhân viên được phân công
+            if ($assignedStaff) {
+                \App\Models\Notification::create([
+                    'user_id' => $assignedStaff->id,
+                    'type' => 'new_order',
+                    'title' => '📦 Đơn hàng mới được phân công',
+                    'message' => "Bạn có đơn hàng mới #{$order->order_number} từ {$order->sender_city} đến {$order->receiver_city}. Khối lượng: {$order->weight}kg",
+                    'data' => [
+                        'order_id' => $order->id,
+                        'order_number' => $order->order_number,
+                        'route_code' => $order->route_code,
+                    ],
+                ]);
+            }
 
             DB::commit();
 
@@ -158,6 +182,25 @@ class CreateOrderController extends Controller
     private function generateTrackingNumber(): string
     {
         return 'FS' . strtoupper(substr(md5(uniqid()), 0, 10));
+    }
+
+    /**
+     * Generate route code based on cities
+     */
+    private function generateRouteCode(string $fromCity, string $toCity): string
+    {
+        $cityAbbr = [
+            'Hà Nội' => 'HN',
+            'TP.HCM' => 'HCM',
+            'Đà Nẵng' => 'DN',
+            'Hải Phòng' => 'HP',
+            'Cần Thơ' => 'CT',
+        ];
+        
+        $from = $cityAbbr[$fromCity] ?? substr($fromCity, 0, 2);
+        $to = $cityAbbr[$toCity] ?? substr($toCity, 0, 2);
+        
+        return strtoupper($from . '-' . $to);
     }
 
     /**

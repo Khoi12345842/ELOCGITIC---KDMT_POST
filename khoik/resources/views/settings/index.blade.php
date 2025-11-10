@@ -1,7 +1,7 @@
 <x-layout title="Cài đặt - FastShip">
     <div class="max-w-4xl mx-auto">
         <x-page-header 
-            title="⚙️ Cài đặt tài khoản" 
+            title="Cài đặt tài khoản" 
             subtitle="Quản lý thông tin cá nhân và bảo mật"
         />
 
@@ -11,20 +11,20 @@
                 <nav class="-mb-px flex gap-6">
                     <button onclick="showSettingsTab('profile')" id="tab-profile" 
                             class="settings-tab-button border-b-2 border-orange-600 text-orange-600 py-3 px-2 font-semibold">
-                        👤 Thông tin cá nhân
+                        Thông tin cá nhân
                     </button>
                     <button onclick="showSettingsTab('password')" id="tab-password" 
                             class="settings-tab-button border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-3 px-2 font-semibold">
-                        🔒 Đổi mật khẩu
+                        Đổi mật khẩu
                     </button>
                     <button onclick="showSettingsTab('notifications')" id="tab-notifications" 
                             class="settings-tab-button border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-3 px-2 font-semibold">
-                        🔔 Thông báo
+                        Thông báo
                     </button>
                     @if(auth()->user()->isBusiness())
                     <button onclick="showSettingsTab('business')" id="tab-business" 
                             class="settings-tab-button border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-3 px-2 font-semibold">
-                        🏢 Doanh nghiệp
+                        Thông tin doanh nghiệp
                     </button>
                     @endif
                 </nav>
@@ -35,7 +35,7 @@
         <div id="content-profile" class="settings-tab-content">
             <x-card>
                 <x-slot:header>
-                    <h3 class="text-lg font-bold">👤 Thông tin cá nhân</h3>
+                    <h3 class="text-lg font-bold">Thông tin cá nhân</h3>
                 </x-slot:header>
 
                 <form method="POST" action="{{ route('settings.profile.update') }}">
@@ -73,7 +73,7 @@
 
                             <div>
                                 <label class="form-label">Loại tài khoản</label>
-                                <input type="text" value="{{ auth()->user()->isBusiness() ? '🏢 Doanh nghiệp' : '👤 Cá nhân' }}" 
+                    <input type="text" value="{{ auth()->user()->isBusiness() ? 'Doanh nghiệp' : 'Cá nhân' }}" 
                                        disabled class="form-input bg-gray-100 cursor-not-allowed">
                             </div>
                         </div>
@@ -88,7 +88,7 @@
 
                         @if(auth()->user()->isBusiness())
                         <div class="border-t pt-4 mt-4">
-                            <h4 class="font-semibold mb-4">🏢 Thông tin doanh nghiệp</h4>
+                            <h4 class="font-semibold mb-4">Thông tin doanh nghiệp</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="form-label">Tên công ty *</label>
@@ -129,7 +129,7 @@
         <div id="content-password" class="settings-tab-content hidden">
             <x-card>
                 <x-slot:header>
-                    <h3 class="text-lg font-bold">🔒 Đổi mật khẩu</h3>
+                    <h3 class="text-lg font-bold">Đổi mật khẩu</h3>
                 </x-slot:header>
 
                 <form method="POST" action="{{ route('settings.password.update') }}">
@@ -139,7 +139,7 @@
                     <div class="space-y-4">
                         <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
                             <p class="text-sm text-yellow-800">
-                                <strong>💡 Lưu ý:</strong> Mật khẩu mới phải có ít nhất 8 ký tự và bao gồm chữ hoa, chữ thường, số.
+                                <strong>Lưu ý:</strong> Mật khẩu mới phải có ít nhất 8 ký tự và bao gồm chữ hoa, chữ thường, số.
                             </p>
                         </div>
 
@@ -182,7 +182,7 @@
         <div id="content-notifications" class="settings-tab-content hidden">
             <x-card>
                 <x-slot:header>
-                    <h3 class="text-lg font-bold">🔔 Cài đặt thông báo</h3>
+                    <h3 class="text-lg font-bold">Cài đặt thông báo</h3>
                 </x-slot:header>
 
                 <form method="POST" action="{{ route('settings.notifications.update') }}">
@@ -196,7 +196,7 @@
                                    class="mt-1 rounded">
                             <div class="flex-1">
                                 <label class="font-semibold text-gray-900 cursor-pointer">
-                                    📧 Thông báo qua Email
+                                    Thông báo qua Email
                                 </label>
                                 <p class="text-sm text-gray-600 mt-1">
                                     Nhận email khi đơn hàng thay đổi trạng thái, chương trình khuyến mãi mới
@@ -210,7 +210,7 @@
                                    class="mt-1 rounded">
                             <div class="flex-1">
                                 <label class="font-semibold text-gray-900 cursor-pointer">
-                                    📱 Thông báo qua SMS
+                                    Thông báo qua SMS
                                 </label>
                                 <p class="text-sm text-gray-600 mt-1">
                                     Nhận tin nhắn SMS khi đơn hàng được giao thành công
@@ -220,7 +220,7 @@
 
                         <div class="bg-blue-50 border-l-4 border-blue-500 p-4">
                             <p class="text-sm text-blue-800">
-                                <strong>ℹ️ Thông tin:</strong> Thông báo email luôn được bật mặc định để đảm bảo bạn không bỏ lỡ các thông tin quan trọng về đơn hàng.
+                                <strong>Thông tin:</strong> Thông báo email luôn được bật mặc định để đảm bảo bạn không bỏ lỡ các thông tin quan trọng về đơn hàng.
                             </p>
                         </div>
                     </div>
@@ -242,13 +242,13 @@
         <div id="content-business" class="settings-tab-content hidden">
             <x-card>
                 <x-slot:header>
-                    <h3 class="text-lg font-bold">🏢 Thông tin doanh nghiệp</h3>
+                    <h3 class="text-lg font-bold">Thông tin doanh nghiệp</h3>
                 </x-slot:header>
 
                 <div class="space-y-6">
                     <!-- Thông tin shop -->
                     <div>
-                        <h4 class="font-semibold mb-4">🏪 Shop liên kết</h4>
+                        <h4 class="font-semibold mb-4">Shop liên kết</h4>
                         @if(auth()->user()->shop_id)
                             <div class="bg-green-50 border border-green-200 rounded-lg p-4">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
@@ -279,7 +279,7 @@
                             <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
                                 <p class="text-gray-600 mb-4">Chưa liên kết shop</p>
                                 <a href="{{ route('shop.link') }}" class="btn btn-primary">
-                                    🔗 Liên kết Shop ngay
+                                    Liên kết Shop ngay
                                 </a>
                             </div>
                         @endif
@@ -287,7 +287,7 @@
 
                     <!-- Hợp đồng -->
                     <div>
-                        <h4 class="font-semibold mb-4">📋 Hợp đồng</h4>
+                        <h4 class="font-semibold mb-4">Hợp đồng</h4>
                         @if(auth()->user()->has_contract)
                             <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
@@ -316,7 +316,7 @@
 
                     <!-- Thống kê -->
                     <div>
-                        <h4 class="font-semibold mb-4">📊 Thống kê</h4>
+                        <h4 class="font-semibold mb-4">Thống kê</h4>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div class="bg-orange-50 border border-orange-200 rounded-lg p-4 text-center">
                                 <div class="text-2xl font-bold text-orange-600">

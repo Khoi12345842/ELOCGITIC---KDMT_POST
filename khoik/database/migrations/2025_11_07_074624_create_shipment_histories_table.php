@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::create('shipment_histories', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('shipment_id')->constrained()->onDelete('cascade');
+            $table->foreignId('order_id')->constrained()->onDelete('cascade');
             
             $table->string('status'); // pending, picked_up, in_transit, delivered...
-            $table->string('location'); // Hà Nội Hub, Đang giao tại Hoàn Kiếm...
-            $table->text('description'); // Mô tả chi tiết
-            $table->string('updated_by')->nullable(); // Nhân viên cập nhật
+            $table->string('location')->nullable(); // Địa chỉ/GPS hiện tại
+            $table->text('notes')->nullable(); // Ghi chú chi tiết
+            $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null'); // Nhân viên cập nhật
             
             $table->timestamp('happened_at'); // Thời gian xảy ra sự kiện
             $table->timestamps();

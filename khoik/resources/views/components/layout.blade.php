@@ -223,6 +223,60 @@
                             </a>
                         @endif
 
+                        <!-- Notification bell -->
+                        <div class="relative" id="notificationDropdown">
+                            <button onclick="toggleNotificationDropdown()" class="relative hover:bg-blue-800 p-2 rounded-lg transition-colors">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                                </svg>
+                                @if(auth()->user()->unreadNotifications()->where('type', 'status_update')->count() > 0)
+                                    <span class="absolute top-0 right-0 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
+                                        {{ auth()->user()->unreadNotifications()->where('type', 'status_update')->count() }}
+                                    </span>
+                                @endif
+                            </button>
+                            
+                            <!-- Notification dropdown -->
+                            <div class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg hidden z-50" id="notificationMenu">
+                                <div class="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                                    <h3 class="font-semibold text-gray-900">Thông báo</h3>
+                                    @if(auth()->user()->unreadNotifications()->where('type', 'status_update')->count() > 0)
+                                        <form action="{{ route('notifications.markAllAsRead') }}" method="POST">
+                                            @csrf
+                                            <button type="submit" class="text-xs text-orange-600 hover:text-orange-700">Đọc tất cả</button>
+                                        </form>
+                                    @endif
+                                </div>
+                                <div class="max-h-96 overflow-y-auto">
+                                    @forelse(auth()->user()->notifications()->where('type', 'status_update')->take(5)->get() as $notification)
+                                        <a href="{{ $notification->data['order_id'] ? route('orders.show', $notification->data['order_id']) : '#' }}" 
+                                           class="block px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100 {{ $notification->isUnread() ? 'bg-blue-50' : '' }}">
+                                            <div class="flex justify-between items-start mb-1">
+                                                <p class="font-semibold text-sm text-gray-900">{{ $notification->title }}</p>
+                                                @if($notification->isUnread())
+                                                    <span class="w-2 h-2 bg-orange-600 rounded-full"></span>
+                                                @endif
+                                            </div>
+                                            <p class="text-xs text-gray-600">{{ $notification->message }}</p>
+                                            <p class="text-xs text-gray-400 mt-1">{{ $notification->created_at->diffForHumans() }}</p>
+                                        </a>
+                                    @empty
+                                        <div class="px-4 py-8 text-center text-gray-500">
+                                            <svg class="w-12 h-12 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                                            </svg>
+                                            <p class="text-sm">Chưa có thông báo</p>
+                                        </div>
+                                    @endforelse
+                                </div>
+                                @if(auth()->user()->notifications()->where('type', 'status_update')->count() > 0)
+                                    <div class="px-4 py-3 border-t border-gray-200 text-center">
+                                        <a href="{{ route('notifications.index') }}" class="text-sm text-orange-600 hover:text-orange-700 font-semibold">Xem tất cả thông báo</a>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+
                         <!-- User dropdown -->
                         <div class="relative" id="userDropdown">
                             <button onclick="toggleUserDropdown()" class="flex items-center gap-2 hover:bg-blue-800 px-3 py-2 rounded-lg transition-colors">
@@ -264,9 +318,11 @@
                                     </a>
                                 @endif
                                 <hr class="my-2">
-                                <a href="{{ route('settings') }}" class="block px-4 py-2 text-gray-800 hover:bg-orange-50 transition-colors">
-                                    ⚙️ Cài đặt
-                                </a>
+                                @if(!auth()->user()->isStaff())
+                                    <a href="{{ route('settings.index') }}" class="block px-4 py-2 text-gray-800 hover:bg-orange-50 transition-colors">
+                                        ⚙️ Cài đặt
+                                    </a>
+                                @endif
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
                                     <button type="submit" class="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 transition-colors">
@@ -357,16 +413,38 @@
             const arrow = document.getElementById('dropdownArrow');
             dropdown.classList.toggle('hidden');
             arrow.classList.toggle('rotate-180');
+            
+            // Close notification dropdown if open
+            document.getElementById('notificationMenu')?.classList.add('hidden');
         }
 
-        // Close dropdown when clicking outside
+        // Toggle notification dropdown
+        function toggleNotificationDropdown() {
+            const dropdown = document.getElementById('notificationMenu');
+            dropdown.classList.toggle('hidden');
+            
+            // Close user dropdown if open
+            const userDropdown = document.getElementById('dropdownMenu');
+            if (userDropdown) {
+                userDropdown.classList.add('hidden');
+                document.getElementById('dropdownArrow')?.classList.remove('rotate-180');
+            }
+        }
+
+        // Close dropdowns when clicking outside
         document.addEventListener('click', function(event) {
             const userDropdown = document.getElementById('userDropdown');
             const dropdown = document.getElementById('dropdownMenu');
+            const notificationDropdown = document.getElementById('notificationDropdown');
+            const notificationMenu = document.getElementById('notificationMenu');
             
             if (userDropdown && !userDropdown.contains(event.target)) {
-                dropdown.classList.add('hidden');
-                document.getElementById('dropdownArrow').classList.remove('rotate-180');
+                dropdown?.classList.add('hidden');
+                document.getElementById('dropdownArrow')?.classList.remove('rotate-180');
+            }
+            
+            if (notificationDropdown && !notificationDropdown.contains(event.target)) {
+                notificationMenu?.classList.add('hidden');
             }
         });
     </script>
