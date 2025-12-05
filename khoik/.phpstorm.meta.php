@@ -34,7 +34,7 @@ namespace PHPSTORM_META {
     
     exitPoint(\abort());
     exitPoint(\dd());
-    exitPoint(\die());
-    exitPoint(\exit());
+    exitPoint('die');
+    exitPoint('exit');
 
 }
